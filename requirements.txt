@@ -2,6 +2,7 @@ fastmcp>=2.12.0
 httpx>=0.27
 fastapi>=0.110
 uvicorn[standard]>=0.30
-citeproc-py
+citeproc-py==0.9.0
 pydantic>=2.7
 fastmcp-http
+citeproc-py-styles==0.1.5

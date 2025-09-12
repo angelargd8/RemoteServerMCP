@@ -195,10 +195,18 @@ async def apa_from_url(url: str, style: str = APA_STYLE_DEFAULT, locale: str = L
     if not items:
         return {"error": "No se pudieron extraer metadatos"}
     try:
+        zts_citation = await _zts_export(items, "citation", style=style)
+        if isinstance(zts_citation, str) and zts_citation.strip():
+            return {"via": "zts-citation", "references": [zts_citation.strip()], "items": items, "style": style, "locale": locale}
+    except Exception:
+        pass
+
+    #  CiteProc local 
+    try:
         apa_refs = _format_bibliography_citeproc(items, style, locale)
+        return {"via": "local-citeproc", "references": apa_refs, "items": items, "style": style, "locale": locale}
     except Exception as e:
         return {"error": f"No se pudo formatear con CiteProc: {e}", "items": items}
-    return {"items": items, "references": apa_refs, "style": style, "locale": locale}
 
 # FastAPI HTTP 
 api = FastAPI(title="ZTR MCP ")
@@ -211,20 +219,7 @@ api.add_middleware(
 )
 
 # Montar el ASGI del MCP 
-try:
-    mcp_asgi = mcp.http_app()
-except AttributeError:
-    try:
-        mcp_asgi = mcp.streamable_http_app()
-    except AttributeError:
-        try:
-            mcp_asgi = mcp.sse_app()
-        except AttributeError:
-            # from fastmcp.http import StreamableHTTPASGIApp
-            # mcp_asgi = StreamableHTTPASGIApp(mcp)
-            raise RuntimeError("No se pudo montar el ASGI del MCP: versión de fastmcp no soportada")
-
-# el que va a usar el chatbot
+mcp_asgi = mcp.sse_app()
 api.mount("/mcp", mcp_asgi)
 
 #verificar el server

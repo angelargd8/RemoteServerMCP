@@ -1,7 +1,7 @@
 # RemoteServerMCP
 
 - Requisitos: 
-tener instalado gcloud
+tener instalado gcloud y docker
 
 
 
@@ -32,10 +32,9 @@ gcloud run deploy ztrmcp `
    --region=us-central1 `
    --platform=managed `
    --allow-unauthenticated `
-   --set-env-vars "ZTS_URL=$ZTS_URL" `
+   --set-env-vars "ZTS_URL=$ZTS_URL,CLOUD_RUN=1" `
    --memory=512Mi `
    --timeout=300 `
-   --port=8080
 
 http://127.0.0.1:8080/healthz
 
@@ -44,8 +43,9 @@ Service URL: https://ztrmcp-990598886898.us-central1.run.app
 
 https://ztrmcp-990598886898.us-central1.run.app
 
-Invoke-WebRequest -Uri "https://ztrmcp-990598886898.us-central1.run.app/healthz" -Method GET
+Invoke-WebRequest -Uri "https://ztrmcp-990598886898.us-central1.run.app" -Method GET
 
+iwr "$ZTR_URL/demo?url=https://academia-lab.com/enciclopedia/modelo-basado-en-agentes/" -Method Get
 
 
 
@@ -66,3 +66,11 @@ gcloud run deploy ztrmcp `
    --set-env-vars "ZTS_URL=$ZTS_URL,CLOUD_RUN=1" `
    --memory=512Mi `
    --timeout=300 `
+
+https://ztrmcp-990598886898.us-central1.run.app
+
+
+iwr -Headers @{Accept="text/event-stream"} -Uri "https://ztrmcp-990598886898.us-central1.run.app/mcp/sse?version=1.0" -Method GET
+
+
+Invoke-WebRequest -Uri "https://ztrmcp-990598886898.us-central1.run.app/mcp/sse?version=1.0" -Method Head
