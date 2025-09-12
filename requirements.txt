@@ -1,0 +1,7 @@
+fastmcp>=2.12.0
+httpx>=0.27
+fastapi>=0.110
+uvicorn[standard]>=0.30
+citeproc-py
+pydantic>=2.7
+fastmcp-http
