@@ -1,32 +1,58 @@
 # RemoteServerMCP
 
-- Requisitos: 
-tener instalado gcloud y docker
+## Requirements: 
+- Google Cloud SDK (`gcloud`)
+- Docker (only needed if you build manually)
 
+## 1. Deploy ZTS
+To create the remote connection server, go to file zts-docker 
 
-
-
+```
 cd "C:\Users\angel\OneDrive\Documentos\.universidad\.2025\s2\redes\RemoteServerMCP\zts-cloudrun"
+```
 
-
+And run the following commands:
+```
 gcloud config set project manifest-surfer-471622-n4
+```
+
+```
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com
+```
 
-
+```
 gcloud run deploy zts --source=. --region=us-central1 --platform=managed --port=1969 --allow-unauthenticated --memory=1Gi --timeout=300
+```
 
-Service URL: https://zts-990598886898.us-central1.run.app
+And this will show the service URL: https://zts-990598886898.us-central1.run.app
 
-https://zts-990598886898.us-central1.run.app
 https://zts-nezqm2fvdq-uc.a.run.app
 
+## 2. Deploy server
+Then, back to project root
+
+```
 cd.. 
+```
 
-$ZTS_URL =  https://zts-nezqm2fvdq-uc.a.run.app
+ask cloud run witch is the URL of zts
 
+```
 $ZTS_URL = (gcloud run services describe zts --region us-central1 --format "value(status.url)")
+```
+
+see the URL
+```
 $ZTS_URL
+```
 
+This will return your MCP server URL, for example:
+```
+$ZTS_URL =  https://zts-nezqm2fvdq-uc.a.run.app
+```
+
+Deploy server:
+```
 gcloud run deploy ztrmcp `
    --source=. `
    --region=us-central1 `
@@ -35,42 +61,33 @@ gcloud run deploy ztrmcp `
    --set-env-vars "ZTS_URL=$ZTS_URL,CLOUD_RUN=1" `
    --memory=512Mi `
    --timeout=300 `
+```
 
-http://127.0.0.1:8080/healthz
 
-Service [ztrmcp] revision [ztrmcp-00008-crx] has been deployed and is serving 100 percent of traffic.
-Service URL: https://ztrmcp-990598886898.us-central1.run.app
 
+with the gcloud server will show you something like this:
+```
 https://ztrmcp-990598886898.us-central1.run.app
+```
 
-Invoke-WebRequest -Uri "https://ztrmcp-990598886898.us-central1.run.app" -Method GET
-
-iwr "$ZTR_URL/demo?url=https://academia-lab.com/enciclopedia/modelo-basado-en-agentes/" -Method Get
-
-
-
+## 3. Verify deployment
+```
 Invoke-RestMethod -Uri "$MCP_URL/openapi.json" -Method GET 
+```
 
-
+```
 Invoke-WebRequest -Uri "$MCP_URL/docs" -Method GET
+```
 
 
+## local server
+try server on browser with local server:
+```
+http://127.0.0.1:8080/healthz
+```
+
+Try to create a reference:
+```
 http://127.0.0.1:8080/demo?url=https://academia-lab.com/enciclopedia/modelo-basado-en-agentes/
+```
 
-
-gcloud run deploy ztrmcp `
-   --source=. `
-   --region=us-central1 `
-   --platform=managed `
-   --allow-unauthenticated `
-   --set-env-vars "ZTS_URL=$ZTS_URL,CLOUD_RUN=1" `
-   --memory=512Mi `
-   --timeout=300 `
-
-https://ztrmcp-990598886898.us-central1.run.app
-
-
-iwr -Headers @{Accept="text/event-stream"} -Uri "https://ztrmcp-990598886898.us-central1.run.app/mcp/sse?version=1.0" -Method GET
-
-
-Invoke-WebRequest -Uri "https://ztrmcp-990598886898.us-central1.run.app/mcp/sse?version=1.0" -Method Head
